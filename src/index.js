@@ -3,17 +3,153 @@ import Phaser from "phaser";
 import logoImg from "./assets/logo.png";
 import staricon from "./assets/star.png";
 import puma from "./assets/puma_limimari.png";
+import shotPNG from "./assets/shmup-bullet.png";
+import mapPNG from "./assets/tileset (2).png";
+import mapJSON from "./assets/untitled.json";
+import playerPNG from "./assets/airfoce1.png";
+
+
+
+const config = {
+  type: Phaser.AUTO,
+  parent: "phaser-example",
+  width: 1400,
+  height: 700,
+  physics: {
+    default: "arcade",
+    arcade: {
+      gravity: { y: 0 },
+    },
+  },
+  scene: {
+    preload: preload,
+    create: create,
+    update: update,
+    render: render,
+  },
+};
+
+const game = new Phaser.Game(config);
+let player;
+var cursors;
+let sprite;
+let weapon;
+let fireButton;
+
+function preload() {
+  this.load.image("tiles", mapPNG);
+  this.load.tilemapTiledJSON("map", mapJSON);
+  this.load.image("bullet", shotPNG);
+  this.load.spritesheet("play", playerPNG, {
+    frameWidth: 40,
+    frameHeight: 60,
+  });
+
+  
+}
+
+function create() {
+  const map = this.make.tilemap({ key: "map" });
+  const tileset = map.addTilesetImage("tileset (2)", "tiles");
+  const ground = map.createStaticLayer("ground", tileset, 0, 0);
+  const ground2 = map.createStaticLayer("abjectCollider", tileset, 0, 0);
+  const ground3 = map.createStaticLayer("towers", tileset, 0, 0); 
+  const ground4 = map.createStaticLayer("towers1", tileset, 0, 0);
+  const ground5 = map.createStaticLayer("objectcollider2", tileset, 0, 0);
+
+  ground2.setCollisionByProperty({ collider: true });
+  player = this.physics.add.sprite(300,300, "play");
+
+  this.physics.add.collider(player, ground2);
+  
+  const camera = this.cameras.main;
+  camera.startFollow(player);
+  camera.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
+  
+  //weapon = game.add.weapon(30, "bullet");
+
+  //  The bullet will be automatically killed when it leaves the world bounds
+  //weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+
+    //  The speed at which the bullet is fired
+  //weapon.bulletSpeed = 600;
+
+    //  Speed-up the rate of fire, allowing them to shoot 1 bullet every 60ms
+  //weapon.fireRate = 100;
+
+  //sprite = this.add.sprite(400, 300, "play");
+
+  //sprite.anchor.set(0.5);
+
+  //game.physics.arcade.enable(player);
+
+  //sprite.body.drag.set(70);
+  //sprite.body.maxVelocity.set(200);
+
+    //  Tell the Weapon to track the 'player' Sprite
+    //  With no offsets from the position
+    //  But the 'true' argument tells the weapon to track sprite rotation
+  //weapon.trackSprite(player, 0, 0, true);
+  //fireButton = this.input.keyboard.addKey(Phaser.KeyCode.SPACEBAR); 
+}
+function update() {
+  
+  player.body.setVelocity(0);
+  player.body.acceleration.set(0);
+
+  cursors = this.input.keyboard.createCursorKeys();
+  
+
+  if (cursors.left.isDown) {
+    player.body.setVelocityX(-250);
+  } else if (cursors.right.isDown) {
+    player.body.setVelocityX(250);
+  } else if (cursors.up.isDown) {
+    player.body.setVelocityY(-250);
+  } else if (cursors.down.isDown) {
+    player.body.setVelocityY(250);
+  } 
+  if (cursors.left.isDown && cursors.up.isDown ) {
+    player.body.setVelocityX(-250);
+    player.body.setVelocityY(-250);
+  } else if (cursors.right.isDown && cursors.up.isDown) {
+    player.body.setVelocityX(250);
+    player.body.setVelocityY(-250);
+  } else if (cursors.down.isDown && cursors.left.isDown) {
+    player.body.setVelocityY(250);
+    player.body.setVelocityX(-250);
+  } else if (cursors.down.isDown && cursors.right.isDown ) {
+    player.body.setVelocityY(250);
+    player.body.setVelocityX(250);
+  } else if (cursors.down.isDown && cursors.up.isDown ) {
+    player.body.setVelocity(0);
+  } else if (cursors.left.isDown && cursors.right.isDown ) {
+    player.body.setVelocity(0);
+  }
+
+  //game.world.wrap(sprite, 16);
+}
+function render() {
+
+  weapon.debug();
+}
+
+/*{
+import Phaser from "phaser";
+import logoImg from "./assets/logo.png";
+import staricon from "./assets/star.png";
+import puma from "./assets/puma_limimari.png";
 import highway from "./assets/asfalto.png";
-import mapPNG from "./assets/pngbarn (1).png";
-import mapJSON from "./assets/map2.json";
+import mapPNG from "./assets/tileset (2).png";
+import mapJSON from "./assets/untitled.json";
 import playerPNG from "./assets/airfoce1.png";
 
 
 const config = {
   type: Phaser.AUTO,
   parent: "phaser-example",
-  width: 900,
-  height: 900,
+  width: 1400,
+  height: 700,
   physics: {
     default: "arcade",
     arcade: {
@@ -36,23 +172,30 @@ function preload() {
   this.load.tilemapTiledJSON("map", mapJSON);
   this.load.image("logo", puma);
   this.load.spritesheet("player", playerPNG, {
-    frameWidth: 32,
+    frameWidth: 40,
     frameHeight: 60,
   });
+
+  game.load.image('bullet', 'assets/sprites/shmup-bullet.png');
 }
 
 function create() {
   const map = this.make.tilemap({ key: "map" });
-  const tileset = map.addTilesetImage("assets", "tiles");
-
-  const ground2 = map.createStaticLayer("objectcolider", tileset, 0, 0);
+  const tileset = map.addTilesetImage("tileset (2)", "tiles");
   const ground = map.createStaticLayer("ground", tileset, 0, 0);
+  const ground2 = map.createStaticLayer("abjectCollider", tileset, 0, 0);
+  const ground3 = map.createStaticLayer("towers", tileset, 0, 0); 
+  const ground4 = map.createStaticLayer("towers1", tileset, 0, 0);
+  const ground5 = map.createStaticLayer("objectcollider2", tileset, 0, 0);
+  
+  
+  
 
-  player = this.physics.add.sprite(100,300, "player");
+  player = this.physics.add.sprite(300,300, "player");
   
   
 
-  /*const logo = this.add.image(450, 300, "logo");
+  const logo = this.add.image(450, 300, "logo");
 
   this.tweens.add({
     targets: logo,
@@ -61,28 +204,66 @@ function create() {
     ease: "Power2",
     yoyo: true,
     loop: -1
-  });*/
+  });
 
+  const camera = this.cameras.main;
+  camera.startFollow(player);
+  camera.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
   
+
+  weapon = game.add.weapon(30, 'bullet');
+
+    //  The bullet will be automatically killed when it leaves the world bounds
+  weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+
+    //  The speed at which the bullet is fired
+  weapon.bulletSpeed = 600;
+
+    //  Speed-up the rate of fire, allowing them to shoot 1 bullet every 60ms
+  weapon.fireRate = 100;
+
+  sprite = this.add.sprite(400, 300, 'ship');
+
+  sprite.anchor.set(0.5);
+
+  game.physics.arcade.enable(sprite);
+
+  sprite.body.drag.set(70);
+  sprite.body.maxVelocity.set(200);
+
+    //  Tell the Weapon to track the 'player' Sprite
+    //  With no offsets from the position
+    //  But the 'true' argument tells the weapon to track sprite rotation
+  weapon.trackSprite(sprite, 0, 0, true);
+
+  cursors = this.input.keyboard.createCursorKeys();
+
+  fireButton = this.input.keyboard.addKey(Phaser.KeyCode.SPACEBAR);
+
 }
 function update() {
   
-  player.body.setVelocity(15);
+  player.body.setVelocity(50);
   cursors = this.input.keyboard.createCursorKeys();
 
-  //keyboard press to move
   if (cursors.left.isDown) {
-    player.body.setVelocityX(-150);
+    player.body.setVelocityX(-250);
   } else if (cursors.right.isDown) {
-    player.body.setVelocityX(150);
+    player.body.setVelocityX(250);
   } else if (cursors.up.isDown) {
-    player.body.setVelocityY(-150);
+    player.body.setVelocityY(-250);
   } else if (cursors.down.isDown) {
-    player.body.setVelocityY(150);
+    player.body.setVelocityY(250);
   } 
 
+  if (fireButton.isDown)
+    {
+        weapon.fire();
+    }
+
+    game.world.wrap(sprite, 16);
 }
-/*import Phaser from "phaser";
+import Phaser from "phaser";
 import logoImg from "./assets/logo.png";
 import staricon from "./assets/star.png";
 import puma from "./assets/puma_limimari.png"
@@ -145,8 +326,8 @@ function create() {
     yoyo: true,
     loop: -1
   });
-}*/
-/*import Phaser from "phaser";
+}
+{import Phaser from "phaser";
 import logoImg from "./assets/logo.png";
 import mapPNG from "./assets/assetsmap.png";
 import mapJSON from "./assets/map.json";
@@ -212,6 +393,7 @@ function create() {
 
   player = this.physics.add.sprite(spawnPoint.x, spawnPoint.y, "player");
 
+  objectCollider.setCollisionByProperty({ collider: true });
   this.physics.add.collider(player, objectCollider);
 
   //first enemy name of the object
@@ -301,8 +483,8 @@ function hitEnemy(player, enemyGroup) {
 }
 
 
-//var config = {
-  /*type: Phaser.AUTO,
+var config = {
+  type: Phaser.AUTO,
   width: 800,
   height: 600,
   physics: {
@@ -316,5 +498,5 @@ function hitEnemy(player, enemyGroup) {
       preload: preload,
       create: create,
       update: update
-  }*/
-//};
+  }
+};*/
